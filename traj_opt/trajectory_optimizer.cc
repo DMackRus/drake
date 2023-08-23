@@ -590,8 +590,8 @@ void TrajectoryOptimizer<T>::CalcInverseDynamicsPartials(
     }
   }
 
-//  std::string file_prefix = "id_partials";
-//  derivative_interpolator_->SavePartials(file_prefix, id_partials);
+  std::string file_prefix = "id_partials";
+  derivative_interpolator_->SavePartials(file_prefix, id_partials);
 
   InterpolateDerivatives(keypoints, id_partials);
 }

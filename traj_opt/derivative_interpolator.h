@@ -18,8 +18,8 @@ struct derivative_interpolator {
     double iterativeErrorThreshold;
 };
 
-//namespace drake {
-//namespace traj_opt {
+namespace drake {
+namespace traj_opt {
 
 class DerivativeInterpolator {
 
@@ -49,6 +49,6 @@ private:
 };
 
 
-//} // namespace traj_opt
-//} // namespace drake
+} // namespace traj_opt
+} // namespace drake
 
