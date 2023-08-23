@@ -1162,7 +1162,8 @@ class TrajectoryOptimizer {
   const SolverParameters params_;
 
   // Derivative interpolator
-  derivative_interpolator interpolator = {"set_interval", 1, 0, 0, 0, 0, 0};    // Settings
+  derivative_interpolator interpolator = {"set_interval", 2, 0, 0, 0, 0, 0};    // Settings
+  derivative_interpolator baseline = {"set_interval", 1, 0, 0, 0, 0, 0};        // Baseline settings
   DerivativeInterpolator* derivative_interpolator_;                             // Class
 
   // Autodiff copies of the system diagram, plant model, optimizer state, and a

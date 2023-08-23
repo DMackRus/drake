@@ -16,7 +16,6 @@
 //}
 
 namespace drake {
-
     namespace traj_opt {
 
         std::vector<int> DerivativeInterpolator::ComputeKeypoints(
@@ -109,8 +108,14 @@ namespace drake {
             std::vector <drake::MatrixX<double>> &dtau_dqp = id_partials->dtau_dqp;
 
             // Save dtau_dqm
-            std::string file_name = file_prefix + "_dtau_dqm.csv";
+            std::cout << "root " << __FILE__ << std::endl;
+            std::string root = "/home/davidrussell/catkin_ws/src/drake/traj_opt/data/";
+            std::string file_name = root + file_prefix + "_dtau_dqm.csv";
+            std::cout << file_name << std::endl;
             fileOutput.open(file_name);
+
+//            //print the fileout location
+//            std::cout << "fileout location: " << file_name << std::endl;
 
             int size = dtau_dqm.size();
 
@@ -128,7 +133,7 @@ namespace drake {
             fileOutput.close();
 
             // Save dtau_dqt
-            file_name = file_prefix + "_dtau_dqt.csv";
+            file_name = root + file_prefix + "_dtau_dqt.csv";
             fileOutput.open(file_name);
 
             size = dtau_dqt.size();
@@ -147,7 +152,7 @@ namespace drake {
             fileOutput.close();
 
             // Save dtau_dqp
-            file_name = file_prefix + "_dtau_dqp.csv";
+            file_name = root + file_prefix + "_dtau_dqp.csv";
             fileOutput.open(file_name);
 
             size = dtau_dqp.size();
@@ -165,7 +170,6 @@ namespace drake {
 
             fileOutput.close();
         }
-
     }
 }
 

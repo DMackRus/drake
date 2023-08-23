@@ -556,7 +556,7 @@ void TrajectoryOptimizer<T>::CalcInverseDynamicsPartials(
     const TrajectoryOptimizerState<T>& state,
     InverseDynamicsPartials<T>* id_partials) const {
   INSTRUMENT_FUNCTION("Computes dtau/dq.");
-  std::vector<int> keypoints = derivative_interpolator_->ComputeKeypoints(interpolator, num_steps());
+  std::vector<int> keypoints = derivative_interpolator_->ComputeKeypoints(baseline, num_steps());
 
   switch (params_.gradients_method) {
     case GradientsMethod::kForwardDifferences: {
@@ -590,10 +590,24 @@ void TrajectoryOptimizer<T>::CalcInverseDynamicsPartials(
     }
   }
 
-  std::string file_prefix = "id_partials";
-  derivative_interpolator_->SavePartials(file_prefix, id_partials);
+    InterpolateDerivatives(keypoints, id_partials);
 
-  InterpolateDerivatives(keypoints, id_partials);
+    if constexpr (std::is_same_v<T, double>){
+        std::string file_prefix = "baseline";
+        derivative_interpolator_->SavePartials(file_prefix, id_partials);
+    }
+
+    keypoints = derivative_interpolator_->ComputeKeypoints(interpolator, num_steps());
+    CalcInverseDynamicsPartialsFiniteDiff(state, id_partials, keypoints);
+    InterpolateDerivatives(keypoints, id_partials);
+
+    if constexpr (std::is_same_v<T, double>){
+        std::string file_prefix = "interpolated";
+        derivative_interpolator_->SavePartials(file_prefix, id_partials);
+    }
+
+//    int temp;
+//    std::cin >> temp;
 }
 
 template <typename T>
