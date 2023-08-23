@@ -16,9 +16,9 @@
 //}
 
 //namespace drake {
-//namespace traj_opt {
+//    namespace traj_opt {
 
-template <typename T>
+template<typename T>
 std::vector<int> DerivativeInterpolator<T>::ComputeKeypoints(
         derivative_interpolator interpolator,
         int horizon) const {
@@ -38,10 +38,10 @@ std::vector<int> DerivativeInterpolator<T>::ComputeKeypoints(
     return keypoints;
 }
 
-template <typename T>
+template<typename T>
 std::vector<int> DerivativeInterpolator<T>::ComputeKeypoints_SetInterval(
         derivative_interpolator interpolator,
-        int horizon) {
+        int horizon) const {
     std::vector<int> keypoints;
     int counter = 0;
     // Push index 0 and 1 by default
@@ -73,30 +73,30 @@ std::vector<int> DerivativeInterpolator<T>::ComputeKeypoints_SetInterval(
     return keypoints;
 }
 
-template <typename T>
+template<typename T>
 std::vector<int> DerivativeInterpolator<T>::ComputeKeypoints_AdaptiveJerk(
         derivative_interpolator interpolator,
-        int horizon) {
+        int horizon) const {
     std::vector<int> keypoints;
     std::cout << interpolator.keyPointMethod << horizon << std::endl;
 
     return keypoints;
 }
 
-template <typename T>
+template<typename T>
 std::vector<int> DerivativeInterpolator<T>::ComputeKeypoints_MagVelChange(
         derivative_interpolator interpolator,
-        int horizon) {
+        int horizon) const {
     std::vector<int> keypoints;
     std::cout << interpolator.keyPointMethod << horizon << std::endl;
 
     return keypoints;
 }
 
-template <typename T>
+template<typename T>
 std::vector<int> DerivativeInterpolator<T>::ComputeKeypoints_IterativeError(
         derivative_interpolator interpolator,
-        int horizon) {
+        int horizon) const {
     std::vector<int> keypoints;
     std::cout << interpolator.keyPointMethod << horizon << std::endl;
 
@@ -166,7 +166,13 @@ std::vector<int> DerivativeInterpolator<T>::ComputeKeypoints_IterativeError(
 //            }
 //        }
 //        fileOutput << std::endl;
-//    }
+//    }TrajectoryOptimizer
 //
 //    fileOutput.close();
 //}
+
+//    }
+//}
+
+template class DerivativeInterpolator<double>;
+//template class DerivativeInterpolator<Eigen::AutoDiffScalar<Eigen::Matrix<double, -1, 1, 0, -1, 1> > >;
