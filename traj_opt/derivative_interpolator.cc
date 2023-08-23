@@ -18,8 +18,7 @@
 //namespace drake {
 //    namespace traj_opt {
 
-template<typename T>
-std::vector<int> DerivativeInterpolator<T>::ComputeKeypoints(
+std::vector<int> DerivativeInterpolator::ComputeKeypoints(
         derivative_interpolator interpolator,
         int horizon) const {
     std::vector<int> keypoints;
@@ -38,8 +37,7 @@ std::vector<int> DerivativeInterpolator<T>::ComputeKeypoints(
     return keypoints;
 }
 
-template<typename T>
-std::vector<int> DerivativeInterpolator<T>::ComputeKeypoints_SetInterval(
+std::vector<int> DerivativeInterpolator::ComputeKeypoints_SetInterval(
         derivative_interpolator interpolator,
         int horizon) const {
     std::vector<int> keypoints;
@@ -73,8 +71,7 @@ std::vector<int> DerivativeInterpolator<T>::ComputeKeypoints_SetInterval(
     return keypoints;
 }
 
-template<typename T>
-std::vector<int> DerivativeInterpolator<T>::ComputeKeypoints_AdaptiveJerk(
+std::vector<int> DerivativeInterpolator::ComputeKeypoints_AdaptiveJerk(
         derivative_interpolator interpolator,
         int horizon) const {
     std::vector<int> keypoints;
@@ -83,8 +80,7 @@ std::vector<int> DerivativeInterpolator<T>::ComputeKeypoints_AdaptiveJerk(
     return keypoints;
 }
 
-template<typename T>
-std::vector<int> DerivativeInterpolator<T>::ComputeKeypoints_MagVelChange(
+std::vector<int> DerivativeInterpolator::ComputeKeypoints_MagVelChange(
         derivative_interpolator interpolator,
         int horizon) const {
     std::vector<int> keypoints;
@@ -93,8 +89,7 @@ std::vector<int> DerivativeInterpolator<T>::ComputeKeypoints_MagVelChange(
     return keypoints;
 }
 
-template<typename T>
-std::vector<int> DerivativeInterpolator<T>::ComputeKeypoints_IterativeError(
+std::vector<int> DerivativeInterpolator::ComputeKeypoints_IterativeError(
         derivative_interpolator interpolator,
         int horizon) const {
     std::vector<int> keypoints;
@@ -103,76 +98,71 @@ std::vector<int> DerivativeInterpolator<T>::ComputeKeypoints_IterativeError(
     return keypoints;
 }
 
-//template <typename T>
-//void DerivativeInterpolator<T>::SavePartials(
-//      std::string file_prefix,
-//      InverseDynamicsPartials<T> *id_partials) const {
-//    std::ofstream fileOutput;
-//
-//    std::vector <drake::MatrixX<T>> &dtau_dqm = id_partials->dtau_dqm;
-//    std::vector <drake::MatrixX<T>> &dtau_dqt = id_partials->dtau_dqt;
-//    std::vector <drake::MatrixX<T>> &dtau_dqp = id_partials->dtau_dqp;
-//
-//    // Save dtau_dqm
-//    std::string file_name = file_prefix + "_dtau_dqm.csv";
-//    fileOutput.open(file_name);
-//
-//    int size = dtau_dqm.size();
-//
-//    for (int i = 0; i < size; i++) {
-//        // Row
-//        for (int j = 0; j < dtau_dqm[i].rows(); j++) {
-//            // Column
-//            for (int k = 0; k < dtau_dqm[i].cols(); k++) {
-//                fileOutput << dtau_dqm[i](j, k) << ",";
-//            }
-//        }
-//        fileOutput << std::endl;
-//    }
-//
-//    fileOutput.close();
-//
-//    // Save dtau_dqt
-//    file_name = file_prefix + "_dtau_dqt.csv";
-//    fileOutput.open(file_name);
-//
-//    size = dtau_dqt.size();
-//
-//    for (int i = 0; i < size; i++) {
-//        // Row
-//        for (int j = 0; j < dtau_dqt[i].rows(); j++) {
-//            // Column
-//            for (int k = 0; k < dtau_dqt[i].cols(); k++) {
-//                fileOutput << dtau_dqt[i](j, k) << ",";
-//            }
-//        }
-//        fileOutput << std::endl;
-//    }
-//
-//    fileOutput.close();
-//
-//    // Save dtau_dqp
-//    file_name = file_prefix + "_dtau_dqp.csv";
-//    fileOutput.open(file_name);
-//
-//    size = dtau_dqp.size();
-//
-//    for (int i = 0; i < size; i++) {
-//        // Row
-//        for (int j = 0; j < dtau_dqp[i].rows(); j++) {
-//            // Column
-//            for (int k = 0; k < dtau_dqp[i].cols(); k++) {
-//                fileOutput << dtau_dqp[i](j, k) << ",";
-//            }
-//        }
-//        fileOutput << std::endl;
-//    }TrajectoryOptimizer
-//
-//    fileOutput.close();
-//}
+void DerivativeInterpolator::SavePartials(
+      std::string file_prefix,
+      InverseDynamicsPartials<double> *id_partials) const {
+    std::ofstream fileOutput;
 
-//    }
-//}
+    std::vector <drake::MatrixX<T>> &dtau_dqm = id_partials->dtau_dqm;
+    std::vector <drake::MatrixX<T>> &dtau_dqt = id_partials->dtau_dqt;
+    std::vector <drake::MatrixX<T>> &dtau_dqp = id_partials->dtau_dqp;
 
-template class DerivativeInterpolator<double>;
-//template class DerivativeInterpolator<Eigen::AutoDiffScalar<Eigen::Matrix<double, -1, 1, 0, -1, 1> > >;
+    // Save dtau_dqm
+    std::string file_name = file_prefix + "_dtau_dqm.csv";
+    fileOutput.open(file_name);
+
+    int size = dtau_dqm.size();
+
+    for (int i = 0; i < size; i++) {
+        // Row
+        for (int j = 0; j < dtau_dqm[i].rows(); j++) {
+            // Column
+            for (int k = 0; k < dtau_dqm[i].cols(); k++) {
+                fileOutput << dtau_dqm[i](j, k) << ",";
+            }
+        }
+        fileOutput << std::endl;
+    }
+
+    fileOutput.close();
+
+    // Save dtau_dqt
+    file_name = file_prefix + "_dtau_dqt.csv";
+    fileOutput.open(file_name);
+
+    size = dtau_dqt.size();
+
+    for (int i = 0; i < size; i++) {
+        // Row
+        for (int j = 0; j < dtau_dqt[i].rows(); j++) {
+            // Column
+            for (int k = 0; k < dtau_dqt[i].cols(); k++) {
+                fileOutput << dtau_dqt[i](j, k) << ",";
+            }
+        }
+        fileOutput << std::endl;
+    }
+
+    fileOutput.close();
+
+    // Save dtau_dqp
+    file_name = file_prefix + "_dtau_dqp.csv";
+    fileOutput.open(file_name);
+
+    size = dtau_dqp.size();
+
+    for (int i = 0; i < size; i++) {
+        // Row
+        for (int j = 0; j < dtau_dqp[i].rows(); j++) {
+            // Column
+            for (int k = 0; k < dtau_dqp[i].cols(); k++) {
+                fileOutput << dtau_dqp[i](j, k) << ",";
+            }
+        }
+        fileOutput << std::endl;
+    }
+
+    fileOutput.close();
+}
+
+

@@ -1163,7 +1163,7 @@ class TrajectoryOptimizer {
 
   // Derivative interpolator
   derivative_interpolator interpolator = {"set_interval", 1, 0, 0, 0, 0, 0};    // Settings
-  DerivativeInterpolator<T>* derivative_interpolator_;                             // Class
+  DerivativeInterpolator* derivative_interpolator_;                             // Class
 
   // Autodiff copies of the system diagram, plant model, optimizer state, and a
   // whole optimizer for computing exact gradients.

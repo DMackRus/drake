@@ -21,7 +21,6 @@ struct derivative_interpolator {
 //namespace drake {
 //namespace traj_opt {
 
-template <typename T>
 class DerivativeInterpolator {
 
 public:
@@ -31,7 +30,7 @@ public:
 
     std::vector<int> ComputeKeypoints(derivative_interpolator interpolator, int horizon) const;
 
-//    void SavePartials(std::string filename, InverseDynamicsPartials<T> *id_partials) const;
+    void SavePartials(std::string filename, InverseDynamicsPartials<double> *id_partials) const;
 //    void GetApproximateDerivsOverTrajectory(derivative_interpolator interpolator);
 
 private:
@@ -48,9 +47,6 @@ private:
     std::vector<int> ComputeKeypoints_IterativeError(derivative_interpolator interpolator, int horizon) const;
 
 };
-
-//template <>
-//std::vector<int> DerivativeInterpolator<Eigen::AutoDiffScalar<Eigen::Matrix<double, -1, 1, 0, -1, 1>>>::ComputeKeypoints(int) const;
 
 
 //} // namespace traj_opt
