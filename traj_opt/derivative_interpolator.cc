@@ -108,10 +108,10 @@ namespace drake {
             std::vector <drake::MatrixX<double>> &dtau_dqp = id_partials->dtau_dqp;
 
             // Save dtau_dqm
-            std::cout << "root " << __FILE__ << std::endl;
+//            std::cout << "root " << __FILE__ << std::endl;
             std::string root = "/home/davidrussell/catkin_ws/src/drake/traj_opt/data/";
             std::string file_name = root + file_prefix + "_dtau_dqm.csv";
-            std::cout << file_name << std::endl;
+//            std::cout << file_name << std::endl;
             fileOutput.open(file_name);
 
 //            //print the fileout location
@@ -169,6 +169,73 @@ namespace drake {
             }
 
             fileOutput.close();
+        }
+
+        double DerivativeInterpolator::ComputeError(
+                const InverseDynamicsPartials<double> *id_partials1,
+                const InverseDynamicsPartials<double> *id_partials2) const{
+
+            double error = 0.0f;
+            const std::vector <drake::MatrixX<double>> &dtau_dqm1 = id_partials1->dtau_dqm;
+            const std::vector <drake::MatrixX<double>> &dtau_dqt1 = id_partials1->dtau_dqt;
+            const std::vector <drake::MatrixX<double>> &dtau_dqp1 = id_partials1->dtau_dqp;
+
+            const std::vector <drake::MatrixX<double>> &dtau_dqm2 = id_partials2->dtau_dqm;
+            const std::vector <drake::MatrixX<double>> &dtau_dqt2 = id_partials2->dtau_dqt;
+            const std::vector <drake::MatrixX<double>> &dtau_dqp2 = id_partials2->dtau_dqp;
+
+            // -------------------------- dtau_dqm -------------------------------------
+            int size = dtau_dqm1.size();
+            double error_dqm = 0.0f;
+            for (int i = 1; i < size; i++) {
+                // Row
+                for (int j = 0; j < dtau_dqm1[i].rows(); j++) {
+                    // Column
+                    for (int k = 0; k < dtau_dqm1[i].cols(); k++) {
+                        error_dqm += abs(dtau_dqm1[i](j, k) - dtau_dqm2[i](j, k));
+                    }
+                }
+            }
+
+            error_dqm = error_dqm / size;
+
+            // -------------------------- dtau_dqt -------------------------------------
+            size = dtau_dqt1.size();
+            double error_dqt = 0.0f;
+            for (int i = 0; i < size; i++) {
+                // Row
+                for (int j = 0; j < dtau_dqt1[i].rows(); j++) {
+                    // Column
+                    for (int k = 0; k < dtau_dqt1[i].cols(); k++) {
+                        error_dqt += abs(dtau_dqt1[i](j, k) - dtau_dqt2[i](j, k));
+                    }
+                }
+            }
+
+            error_dqt = error_dqt / size;
+
+            // -------------------------- dtau_dqp -------------------------------------
+            size = dtau_dqp1.size();
+            double error_dqp = 0.0f;
+            for (int i = 0; i < size; i++) {
+                // Row
+                for (int j = 0; j < dtau_dqp1[i].rows(); j++) {
+                    // Column
+                    for (int k = 0; k < dtau_dqp1[i].cols(); k++) {
+                        error_dqp += abs(dtau_dqp1[i](j, k) - dtau_dqp2[i](j, k));
+                    }
+                }
+            }
+
+            error_dqp = error_dqp / size;
+
+            std::cout << "error_dqm: " << error_dqm << std::endl;
+            std::cout << "error_dqt: " << error_dqt << std::endl;
+            std::cout << "error_dqp: " << error_dqp << std::endl;
+
+            error = error_dqm + error_dqt + error_dqp;
+
+            return error;
         }
     }
 }

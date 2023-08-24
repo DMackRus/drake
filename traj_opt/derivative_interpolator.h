@@ -31,6 +31,8 @@ public:
     std::vector<int> ComputeKeypoints(derivative_interpolator interpolator, int horizon) const;
 
     void SavePartials(std::string filename, InverseDynamicsPartials<double> *id_partials) const;
+
+    double ComputeError(const InverseDynamicsPartials<double> *id_partials1, const InverseDynamicsPartials<double> *id_partials2) const;
 //    void GetApproximateDerivsOverTrajectory(derivative_interpolator interpolator);
 
 private:

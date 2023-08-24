@@ -26,12 +26,12 @@ Qfq : [100, 100]  # Terminal cost
 Qfv : [1.0, 1.0]
 
 # Problem definition parameters
-time_step : 0.01   # Discretization timestep (seconds)
-num_steps : 400     # number of timesteps
+time_step : 0.05   # Discretization timestep (seconds)
+num_steps : 100     # number of timesteps
 
 # Solver parameters
 max_iters : 100             # maximum Gauss-Newton iterations
-method : "linesearch"     # solver method, {linesearch, trust_region}
+method : "trust_region"     # solver method, {linesearch, trust_region}
 linesearch : "backtracking" # linesearch strategy, {armino, backtracking}
 proximal_operator : false   # whether to add a proximal operator cost term
 rho_proximal : 1e-8         # the proximal cost multiplier

@@ -556,11 +556,16 @@ void TrajectoryOptimizer<T>::CalcInverseDynamicsPartials(
     const TrajectoryOptimizerState<T>& state,
     InverseDynamicsPartials<T>* id_partials) const {
   INSTRUMENT_FUNCTION("Computes dtau/dq.");
-  std::vector<int> keypoints = derivative_interpolator_->ComputeKeypoints(baseline, num_steps());
+
+    std::vector<int> keypoints_baseline = derivative_interpolator_->ComputeKeypoints(interpolator, num_steps());
+    std::vector<int> keypoints_interpolator = derivative_interpolator_->ComputeKeypoints(baseline, num_steps());
+    InverseDynamicsPartials<T>* interpolated_partials = new InverseDynamicsPartials<T>(num_steps(), plant().num_velocities(), plant().num_positions());
+
 
   switch (params_.gradients_method) {
     case GradientsMethod::kForwardDifferences: {
-      CalcInverseDynamicsPartialsFiniteDiff(state, id_partials, keypoints);
+      CalcInverseDynamicsPartialsFiniteDiff(state, id_partials, keypoints_baseline);
+        CalcInverseDynamicsPartialsFiniteDiff(state, interpolated_partials, keypoints_interpolator);
       break;
     }
     case GradientsMethod::kCentralDifferences: {
@@ -590,21 +595,50 @@ void TrajectoryOptimizer<T>::CalcInverseDynamicsPartials(
     }
   }
 
-    InterpolateDerivatives(keypoints, id_partials);
+    InterpolateDerivatives(keypoints_baseline, id_partials);
+    InterpolateDerivatives(keypoints_interpolator, interpolated_partials);
+
+
+    id_partials->dtau_dqm = interpolated_partials->dtau_dqm;
+    id_partials->dtau_dqt = interpolated_partials->dtau_dqt;
+    id_partials->dtau_dqp = interpolated_partials->dtau_dqp;
+
+//    int size = id_partials->dtau_dqp.size();
+//    for (int i = 0; i < size; i++) {
+//        // Row
+//        for (int j = 0; j < id_partials->dtau_dqp[i].rows(); j++) {
+//            // Column
+//            for (int k = 0; k < id_partials->dtau_dqp[i].cols(); k++) {
+//                id_partials->dtau_dqp[i](j, k) = interpolated_partials->dtau_dqp[i](j, k);
+//            }
+//        }
+//    }
+
+    double error;
+
+    if constexpr (std::is_same_v<T, double>)
+    {
+        error = derivative_interpolator_->ComputeError(id_partials, interpolated_partials);
+    }
+
+    std::cout << "error of inteprolation: " << error << "\n";
+
+    if constexpr (std::is_same_v<T, double>){
+        std::string file_prefix = "interpolated";
+        derivative_interpolator_->SavePartials(file_prefix, interpolated_partials);
+    }
 
     if constexpr (std::is_same_v<T, double>){
         std::string file_prefix = "baseline";
         derivative_interpolator_->SavePartials(file_prefix, id_partials);
+
     }
 
-    keypoints = derivative_interpolator_->ComputeKeypoints(interpolator, num_steps());
-    CalcInverseDynamicsPartialsFiniteDiff(state, id_partials, keypoints);
-    InterpolateDerivatives(keypoints, id_partials);
+//    id_partials->dtau_dqm = interpolated_partials->dtau_dqm;
 
-    if constexpr (std::is_same_v<T, double>){
-        std::string file_prefix = "interpolated";
-        derivative_interpolator_->SavePartials(file_prefix, id_partials);
-    }
+
+
+
 
 //    int temp;
 //    std::cin >> temp;
