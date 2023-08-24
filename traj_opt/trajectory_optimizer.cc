@@ -557,7 +557,7 @@ void TrajectoryOptimizer<T>::CalcInverseDynamicsPartials(
     InverseDynamicsPartials<T>* id_partials) const {
   INSTRUMENT_FUNCTION("Computes dtau/dq.");
 
-    std::vector<int> keypoints_baseline = derivative_interpolator_->ComputeKeypoints(interpolator, num_steps());
+    std::vector<int> keypoints_baseline = derivative_interpolator_->ComputeKeypoints(baseline, num_steps());
     std::vector<int> keypoints_interpolator = derivative_interpolator_->ComputeKeypoints(baseline, num_steps());
     InverseDynamicsPartials<T>* interpolated_partials = new InverseDynamicsPartials<T>(num_steps(), plant().num_velocities(), plant().num_positions());
 
@@ -599,17 +599,20 @@ void TrajectoryOptimizer<T>::CalcInverseDynamicsPartials(
     InterpolateDerivatives(keypoints_interpolator, interpolated_partials);
 
 
-    id_partials->dtau_dqm = interpolated_partials->dtau_dqm;
-    id_partials->dtau_dqt = interpolated_partials->dtau_dqt;
-    id_partials->dtau_dqp = interpolated_partials->dtau_dqp;
+//    id_partials->dtau_dqm = interpolated_partials->dtau_dqm;
+//    id_partials->dtau_dqt = interpolated_partials->dtau_dqt;
+//    id_partials->dtau_dqp = interpolated_partials->dtau_dqp;
+
+    id_partials->dtau_dqm[3](0, 0) += 40;
 
 //    int size = id_partials->dtau_dqp.size();
-//    for (int i = 0; i < size; i++) {
+//    for (int i = 2; i < size; i++) {
 //        // Row
 //        for (int j = 0; j < id_partials->dtau_dqp[i].rows(); j++) {
 //            // Column
 //            for (int k = 0; k < id_partials->dtau_dqp[i].cols(); k++) {
-//                id_partials->dtau_dqp[i](j, k) = interpolated_partials->dtau_dqp[i](j, k);
+////                id_partials->dtau_dqp[i](j, k) = interpolated_partials->dtau_dqp[i](j, k);
+//                id_partials->dtau_dqp[i](j, k) += 0.4;
 //            }
 //        }
 //    }
@@ -635,10 +638,6 @@ void TrajectoryOptimizer<T>::CalcInverseDynamicsPartials(
     }
 
 //    id_partials->dtau_dqm = interpolated_partials->dtau_dqm;
-
-
-
-
 
 //    int temp;
 //    std::cin >> temp;
