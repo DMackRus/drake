@@ -1162,7 +1162,7 @@ class TrajectoryOptimizer {
   const SolverParameters params_;
 
   // Derivative interpolator
-  derivative_interpolator interpolator = {"set_interval", 2, 0, 0, 0, 0, 0};    // Settings
+  derivative_interpolator SI2 = {"set_interval", 5, 0, 0, 0, 0, 0};    // Settings
   derivative_interpolator baseline = {"set_interval", 1, 0, 0, 0, 0, 0};        // Baseline settings
   DerivativeInterpolator* derivative_interpolator_;                             // Class
 

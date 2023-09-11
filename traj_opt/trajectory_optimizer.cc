@@ -557,15 +557,14 @@ void TrajectoryOptimizer<T>::CalcInverseDynamicsPartials(
     InverseDynamicsPartials<T>* id_partials) const {
   INSTRUMENT_FUNCTION("Computes dtau/dq.");
 
-    std::vector<int> keypoints_baseline = derivative_interpolator_->ComputeKeypoints(baseline, num_steps());
-    std::vector<int> keypoints_interpolator = derivative_interpolator_->ComputeKeypoints(baseline, num_steps());
-    InverseDynamicsPartials<T>* interpolated_partials = new InverseDynamicsPartials<T>(num_steps(), plant().num_velocities(), plant().num_positions());
-
+    std::vector<int> keypoints_baseline = derivative_interpolator_->ComputeKeypoints(SI2, num_steps());
+//    std::vector<int> keypoints_interpolator = derivative_interpolator_->ComputeKeypoints(baseline, num_steps());
+//    InverseDynamicsPartials<T>* interpolated_partials = new InverseDynamicsPartials<T>(num_steps(), plant().num_velocities(), plant().num_positions());
 
   switch (params_.gradients_method) {
     case GradientsMethod::kForwardDifferences: {
       CalcInverseDynamicsPartialsFiniteDiff(state, id_partials, keypoints_baseline);
-        CalcInverseDynamicsPartialsFiniteDiff(state, interpolated_partials, keypoints_interpolator);
+//      CalcInverseDynamicsPartialsFiniteDiff(state, interpolated_partials, keypoints_interpolator);
       break;
     }
     case GradientsMethod::kCentralDifferences: {
@@ -596,14 +595,12 @@ void TrajectoryOptimizer<T>::CalcInverseDynamicsPartials(
   }
 
     InterpolateDerivatives(keypoints_baseline, id_partials);
-    InterpolateDerivatives(keypoints_interpolator, interpolated_partials);
+//    InterpolateDerivatives(keypoints_interpolator, interpolated_partials);
 
 
 //    id_partials->dtau_dqm = interpolated_partials->dtau_dqm;
 //    id_partials->dtau_dqt = interpolated_partials->dtau_dqt;
 //    id_partials->dtau_dqp = interpolated_partials->dtau_dqp;
-
-    id_partials->dtau_dqm[3](0, 0) += 40;
 
 //    int size = id_partials->dtau_dqp.size();
 //    for (int i = 2; i < size; i++) {
@@ -611,31 +608,34 @@ void TrajectoryOptimizer<T>::CalcInverseDynamicsPartials(
 //        for (int j = 0; j < id_partials->dtau_dqp[i].rows(); j++) {
 //            // Column
 //            for (int k = 0; k < id_partials->dtau_dqp[i].cols(); k++) {
-////                id_partials->dtau_dqp[i](j, k) = interpolated_partials->dtau_dqp[i](j, k);
 //                id_partials->dtau_dqp[i](j, k) += 0.4;
 //            }
 //        }
 //    }
 
-    double error;
-
-    if constexpr (std::is_same_v<T, double>)
-    {
-        error = derivative_interpolator_->ComputeError(id_partials, interpolated_partials);
-    }
-
-    std::cout << "error of inteprolation: " << error << "\n";
-
-    if constexpr (std::is_same_v<T, double>){
-        std::string file_prefix = "interpolated";
-        derivative_interpolator_->SavePartials(file_prefix, interpolated_partials);
-    }
-
-    if constexpr (std::is_same_v<T, double>){
-        std::string file_prefix = "baseline";
-        derivative_interpolator_->SavePartials(file_prefix, id_partials);
-
-    }
+//    std::cout << "id_partials before pertubation: " << id_partials->dtau_dqm[3](0, 0) << std::endl;
+//    id_partials->dtau_dqm[3](0, 0) += 20;
+//    std::cout << "id_partials after pertubation: " << id_partials->dtau_dqm[3](0, 0) << std::endl;
+//
+//    double error;
+//
+//    if constexpr (std::is_same_v<T, double>)
+//    {
+//        error = derivative_interpolator_->ComputeError(id_partials, interpolated_partials);
+//    }
+//
+//    std::cout << "error of inteprolation: " << error << "\n";
+//
+//    if constexpr (std::is_same_v<T, double>){
+//        std::string file_prefix = "interpolated";
+//        derivative_interpolator_->SavePartials(file_prefix, interpolated_partials);
+//    }
+//
+//    if constexpr (std::is_same_v<T, double>){
+//        std::string file_prefix = "baseline";
+//        derivative_interpolator_->SavePartials(file_prefix, id_partials);
+//
+//    }
 
 //    id_partials->dtau_dqm = interpolated_partials->dtau_dqm;
 
@@ -807,6 +807,8 @@ void TrajectoryOptimizer<T>::CalcInverseDynamicsPartialsFiniteDiff(
       CalcInverseDynamicsSingleTimeStep(context_t, a_eps_tm, &workspace,
                                         &tau_eps_tm);
       dtau_dqp[t - 1].col(i) = (tau_eps_tm - tau[t - 1]) / dq_i;
+
+//      dtau_dqp[t - 1](0, 0) += 1;
 
       // tau[t] = ID(q[t+1], v[t+1], a[t])
       if (t < num_steps()) {

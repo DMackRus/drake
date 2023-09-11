@@ -34,7 +34,7 @@ num_steps : 40    # number of timesteps
 
 # Solver parameters
 max_iters : 50              # maximum Gauss-Newton iterations
-method : "trust_region"     # solver method, {linesearch, trust_region}
+method : "linesearch"     # solver method, {linesearch, trust_region}
 linesearch : "armijo"       # linesearch strategy, {armino, backtracking}
 proximal_operator : false   # whether to add a proximal operator cost term
 rho_proximal : 1e-5         # the proximal cost multiplier
@@ -45,7 +45,7 @@ gradients_method: "forward_differences"
 
 # Playback/visualization parameters
 play_target_trajectory : true
-play_initial_guess : true
+play_initial_guess : false
 play_optimal_trajectory : true
 
 # Debugging parameters
@@ -54,7 +54,7 @@ print_debug_data : false
 save_solver_stats_csv : true
 
 # MPC parameters
-mpc : true
+mpc : false
 mpc_iters : 1
 controller_frequency : 300
 sim_time : 5
