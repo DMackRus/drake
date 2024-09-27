@@ -556,9 +556,15 @@ void TrajectoryOptimizer<T>::CalcInverseDynamicsPartials(
     const TrajectoryOptimizerState<T>& state,
     InverseDynamicsPartials<T>* id_partials) const {
   INSTRUMENT_FUNCTION("Computes dtau/dq.");
+
+    std::vector<int> keypoints_baseline = derivative_interpolator_->ComputeKeypoints(SI2, num_steps());
+//    std::vector<int> keypoints_interpolator = derivative_interpolator_->ComputeKeypoints(baseline, num_steps());
+//    InverseDynamicsPartials<T>* interpolated_partials = new InverseDynamicsPartials<T>(num_steps(), plant().num_velocities(), plant().num_positions());
+
   switch (params_.gradients_method) {
     case GradientsMethod::kForwardDifferences: {
-      CalcInverseDynamicsPartialsFiniteDiff(state, id_partials);
+      CalcInverseDynamicsPartialsFiniteDiff(state, id_partials, keypoints_baseline);
+//      CalcInverseDynamicsPartialsFiniteDiff(state, interpolated_partials, keypoints_interpolator);
       break;
     }
     case GradientsMethod::kCentralDifferences: {
@@ -587,12 +593,116 @@ void TrajectoryOptimizer<T>::CalcInverseDynamicsPartials(
           "and therefore the computation of gradients is not enabled.");
     }
   }
+
+    InterpolateDerivatives(keypoints_baseline, id_partials);
+//    InterpolateDerivatives(keypoints_interpolator, interpolated_partials);
+
+
+//    id_partials->dtau_dqm = interpolated_partials->dtau_dqm;
+//    id_partials->dtau_dqt = interpolated_partials->dtau_dqt;
+//    id_partials->dtau_dqp = interpolated_partials->dtau_dqp;
+
+//    int size = id_partials->dtau_dqp.size();
+//    for (int i = 2; i < size; i++) {
+//        // Row
+//        for (int j = 0; j < id_partials->dtau_dqp[i].rows(); j++) {
+//            // Column
+//            for (int k = 0; k < id_partials->dtau_dqp[i].cols(); k++) {
+//                id_partials->dtau_dqp[i](j, k) += 0.4;
+//            }
+//        }
+//    }
+
+//    std::cout << "id_partials before pertubation: " << id_partials->dtau_dqm[3](0, 0) << std::endl;
+//    id_partials->dtau_dqm[3](0, 0) += 20;
+//    std::cout << "id_partials after pertubation: " << id_partials->dtau_dqm[3](0, 0) << std::endl;
+//
+//    double error;
+//
+//    if constexpr (std::is_same_v<T, double>)
+//    {
+//        error = derivative_interpolator_->ComputeError(id_partials, interpolated_partials);
+//    }
+//
+//    std::cout << "error of inteprolation: " << error << "\n";
+//
+//    if constexpr (std::is_same_v<T, double>){
+//        std::string file_prefix = "interpolated";
+//        derivative_interpolator_->SavePartials(file_prefix, interpolated_partials);
+//    }
+//
+//    if constexpr (std::is_same_v<T, double>){
+//        std::string file_prefix = "baseline";
+//        derivative_interpolator_->SavePartials(file_prefix, id_partials);
+//
+//    }
+
+//    id_partials->dtau_dqm = interpolated_partials->dtau_dqm;
+
+//    int temp;
+//    std::cin >> temp;
+}
+
+template <typename T>
+void TrajectoryOptimizer<T>::InterpolateDerivatives(
+    std::vector<int> keypoints,
+    InverseDynamicsPartials<T>* id_partials) const{
+
+    std::vector<MatrixX<T>>& dtau_dqm = id_partials->dtau_dqm;
+    std::vector<MatrixX<T>>& dtau_dqt = id_partials->dtau_dqt;
+    std::vector<MatrixX<T>>& dtau_dqp = id_partials->dtau_dqp;
+
+    for(long unsigned int i = 0; i < keypoints.size() - 2; i++){
+        int start_index = keypoints[i];
+        int end_index = keypoints[i+1];
+        int interval = end_index - start_index;
+
+        MatrixX<T> dtau_dqp_add;
+        MatrixX<T> dtau_dqt_add;
+        MatrixX<T> dtau_dqm_add;
+
+        bool do_dqp = true;
+        bool do_dqm = true;
+
+        if(start_index == 0){
+            do_dqp = false;
+        }
+
+        if(end_index == num_steps() - 1){
+            do_dqm = false;
+        }
+
+        if(do_dqp){
+            dtau_dqp_add = (dtau_dqp.at(end_index - 1) - dtau_dqp.at(start_index - 1)) / interval;
+        }
+
+        dtau_dqt_add = (dtau_dqt.at(end_index) - dtau_dqt.at(start_index)) / interval;
+
+        if(do_dqm){
+            dtau_dqm_add = (dtau_dqm.at(end_index + 1) - dtau_dqm.at(start_index + 1)) / interval;
+        }
+
+        for(int j = 1; j < interval; j++){
+
+            // dtau_dqp is at keypoint index - 1
+            if(do_dqp)
+                dtau_dqp.at(start_index + j - 1) = dtau_dqp.at(start_index - 1) + (dtau_dqp_add * j);
+
+            // dtau_dqt is at keypoint index
+            dtau_dqt.at(start_index + j) = dtau_dqt.at(start_index) + (dtau_dqt_add * j);
+
+            // dtau_dqm is at keypoint index + 1
+            if(do_dqm)
+                dtau_dqm.at(start_index + j + 1) = dtau_dqm.at(start_index + 1) + (dtau_dqm_add * j);
+        }
+    }
 }
 
 template <typename T>
 void TrajectoryOptimizer<T>::CalcInverseDynamicsPartialsFiniteDiff(
     const TrajectoryOptimizerState<T>& state,
-    InverseDynamicsPartials<T>* id_partials) const {
+    InverseDynamicsPartials<T>* id_partials,
+    std::vector<int> keypoints) const {
   using std::abs;
   using std::max;
   // Check that id_partials has been allocated correctly.
@@ -621,12 +731,14 @@ void TrajectoryOptimizer<T>::CalcInverseDynamicsPartialsFiniteDiff(
 #if defined(_OPENMP)
 #pragma omp parallel for num_threads(params_.num_threads)
 #endif
-  for (int t = 1; t <= num_steps(); ++t) {
+  for (long unsigned int k = 1; k < keypoints.size(); k++){
+//  for (int t = 1; t <= num_steps(); ++t) {
     // N.B. A perturbation of qt propagates to tau[t-1], tau[t] and tau[t+1].
     // Therefore we compute one column of grad_tau at a time. That is, once the
     // loop on position indices i is over, we effectively computed the t-th
     // column of grad_tau.
-
+    int t = keypoints[k];
+//    std::cout << "keypoint is: " << t << std::endl;
     // N.B. we need a separate workspace for each timestep, otherwise threads
     // will fight over the same workspace
     TrajectoryOptimizerWorkspace<T>& workspace =
@@ -695,6 +807,8 @@ void TrajectoryOptimizer<T>::CalcInverseDynamicsPartialsFiniteDiff(
       CalcInverseDynamicsSingleTimeStep(context_t, a_eps_tm, &workspace,
                                         &tau_eps_tm);
       dtau_dqp[t - 1].col(i) = (tau_eps_tm - tau[t - 1]) / dq_i;
+
+//      dtau_dqp[t - 1](0, 0) += 1;
 
       // tau[t] = ID(q[t+1], v[t+1], a[t])
       if (t < num_steps()) {

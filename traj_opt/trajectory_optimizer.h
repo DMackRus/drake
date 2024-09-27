@@ -19,6 +19,7 @@
 #include "drake/traj_opt/trajectory_optimizer_workspace.h"
 #include "drake/traj_opt/velocity_partials.h"
 #include "drake/traj_opt/warm_start.h"
+#include "drake/traj_opt/derivative_interpolator.h"
 
 namespace drake {
 namespace systems {
@@ -769,6 +770,17 @@ class TrajectoryOptimizer {
       InverseDynamicsPartials<T>* id_partials) const;
 
   /**
+   * Interpolate the derivatives computed at the keypoints to get
+   * derivatives over the entire trajectory
+   *
+   * @param keypoints list of indiced where we have computed derivatives
+   * @param id_partials struct for holding dtau/dq
+   */
+  void InterpolateDerivatives(
+      std::vector<int> keypoints,
+      InverseDynamicsPartials<T>* id_partials) const;
+
+  /**
    * Compute partial derivatives of the inverse dynamics
    *
    *    tau_t = ID(q_{t-1}, q_t, q_{t+1})
@@ -780,7 +792,8 @@ class TrajectoryOptimizer {
    */
   void CalcInverseDynamicsPartialsFiniteDiff(
       const TrajectoryOptimizerState<T>& state,
-      InverseDynamicsPartials<T>* id_partials) const;
+      InverseDynamicsPartials<T>* id_partials,
+      std::vector<int> keypoints) const;
 
   /**
    * Compute partial derivatives of the inverse dynamics
@@ -1147,6 +1160,11 @@ class TrajectoryOptimizer {
 
   // Various parameters
   const SolverParameters params_;
+
+  // Derivative interpolator
+  derivative_interpolator SI2 = {"set_interval", 5, 0, 0, 0, 0, 0};    // Settings
+  derivative_interpolator baseline = {"set_interval", 1, 0, 0, 0, 0, 0};        // Baseline settings
+  DerivativeInterpolator* derivative_interpolator_;                             // Class
 
   // Autodiff copies of the system diagram, plant model, optimizer state, and a
   // whole optimizer for computing exact gradients.
